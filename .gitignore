@@ -1,0 +1,11 @@
+# Node modules
+node_modules/
+
+# Env files
+.env
+
+# Uploads (if you don’t want to track user uploads locally)
+uploads/
+
+# Logs
+*.log
