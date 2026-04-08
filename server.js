@@ -41,14 +41,38 @@ app.post(
 );
 
 // --- Normal middleware (after webhook)
-const allowedOrigins = [
+const normalizeOrigin = (value) => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  try {
+    return new URL(value.trim()).origin;
+  } catch {
+    return null;
+  }
+};
+
+const envOrigins = [
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URL_ALT,
-  'http://localhost:5173',   // Vite dev (FE)
-  'http://127.0.0.1:5173',
-  'http://localhost:5174',   // Vite dev (admin)
-  'http://127.0.0.1:5174',
-].filter(Boolean);
+  process.env.ADMIN_URL,
+  process.env.ADMIN_URL_ALT,
+  ...(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
+
+const allowedOrigins = [
+  ...new Set([
+    ...envOrigins.map(normalizeOrigin).filter(Boolean),
+    'http://localhost:5173',   // Vite dev (storefront)
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',   // Vite dev (admin)
+    'http://127.0.0.1:5174',
+  ]),
+];
 
 app.use(
   cors({
